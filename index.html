@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pokémon Explorer</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <h1>Pokémon Explorer</h1>
+        
+        <div class="search-container">
+            <input type="text" id="pokemonInput" placeholder="Enter Pokémon name or ID">
+            <button id="searchBtn">Search</button>
+        </div>
+        
+        <div class="random-container">
+            <button id="randomBtn">Random Pokémon</button>
+        </div>
+        
+        <div class="pagination-container">
+            <button id="prevBtn">Previous</button>
+            <span id="pageInfo">Page 1</span>
+            <button id="nextBtn">Next</button>
+        </div>
+        
+        <div class="favorites-container">
+            <h3>Favorites</h3>
+            <div id="favoritesList" class="favorites-list"></div>
+        </div>
+        
+        <div id="pokemonCard" class="pokemon-card hidden">
+            <div class="pokemon-image-container">
+                <img id="pokemonImage" src="" alt="Pokémon image">
+                <button id="favoriteBtn" class="favorite-btn">❤</button>
+            </div>
+            <div class="pokemon-info">
+                <h2 id="pokemonName"></h2>
+                <p id="pokemonId"></p>
+                <div class="pokemon-types" id="pokemonTypes"></div>
+                
+                <div class="tabs">
+                    <button class="tab-btn active" data-tab="stats">Stats</button>
+                    <button class="tab-btn" data-tab="abilities">Abilities</button>
+                    <button class="tab-btn" data-tab="moves">Moves</button>
+                </div>
+                
+                <div class="tab-content">
+                    <div id="statsTab" class="tab-pane active">
+                        <div class="pokemon-stats" id="pokemonStats"></div>
+                    </div>
+                    <div id="abilitiesTab" class="tab-pane">
+                        <div class="pokemon-abilities" id="pokemonAbilities"></div>
+                    </div>
+                    <div id="movesTab" class="tab-pane">
+                        <div class="pokemon-moves" id="pokemonMoves"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div id="errorMessage" class="error hidden"></div>
+    </div>
+    
+    <script src="script.js"></script>
+</body>
+</html> 
