@@ -269,6 +269,41 @@ document.addEventListener('DOMContentLoaded', () => {
         // Calculate and display weaknesses
         calculateWeaknesses(pokemon.types.map(t => t.type.name));
         
+        // Remove any existing strengths tab and pane first
+        const existingStrengthsTab = document.querySelector('.tab-btn[data-tab="strengths"]');
+        if (existingStrengthsTab) {
+            existingStrengthsTab.remove();
+        }
+        const existingStrengthsPane = document.getElementById('strengthsTab');
+        if (existingStrengthsPane) {
+            existingStrengthsPane.remove();
+        }
+        
+        // Add strengths tab
+        const strengthsTab = document.createElement('button');
+        strengthsTab.classList.add('tab-btn');
+        strengthsTab.setAttribute('data-tab', 'strengths');
+        strengthsTab.textContent = 'Strengths';
+        document.querySelector('.tabs').appendChild(strengthsTab);
+        
+        // Add click event listener to the new tab
+        strengthsTab.addEventListener('click', () => {
+            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+            strengthsTab.classList.add('active');
+            document.querySelectorAll('.tab-pane').forEach(pane => pane.classList.remove('active'));
+            document.getElementById('strengthsTab').classList.add('active');
+        });
+        
+        // Add strengths pane
+        const strengthsPane = document.createElement('div');
+        strengthsPane.id = 'strengthsTab';
+        strengthsPane.classList.add('tab-pane');
+        strengthsPane.innerHTML = '<div class="pokemon-strengths" id="pokemonStrengths"></div>';
+        document.querySelector('.tab-content').appendChild(strengthsPane);
+        
+        // Calculate and display strengths
+        calculateStrengths(pokemon.types.map(t => t.type.name));
+        
         // Reset to stats tab
         tabBtns[0].click();
         
@@ -508,4 +543,92 @@ document.addEventListener('DOMContentLoaded', () => {
         
         weaknessesContainer.appendChild(weaknessesElement);
     }
-}); 
+
+    // Function to calculate strengths
+    function calculateStrengths(types) {
+        const strengthsContainer = document.getElementById('pokemonStrengths');
+        strengthsContainer.innerHTML = '<p>Calculating strengths...</p>';
+
+        // Attacking effectiveness chart
+        const attackChart = {
+            normal:    { strong: [],           weak: ['rock', 'steel'],     immune: ['ghost'] },
+            fire:      { strong: ['grass', 'ice', 'bug', 'steel'], weak: ['fire', 'water', 'rock', 'dragon'], immune: [] },
+            water:     { strong: ['fire', 'ground', 'rock'], weak: ['water', 'grass', 'dragon'], immune: [] },
+            electric:  { strong: ['water', 'flying'], weak: ['electric', 'grass', 'dragon'], immune: ['ground'] },
+            grass:     { strong: ['water', 'ground', 'rock'], weak: ['fire', 'grass', 'poison', 'flying', 'bug', 'dragon', 'steel'], immune: [] },
+            ice:       { strong: ['grass', 'ground', 'flying', 'dragon'], weak: ['fire', 'water', 'ice', 'steel'], immune: [] },
+            fighting:  { strong: ['normal', 'ice', 'rock', 'dark', 'steel'], weak: ['poison', 'flying', 'psychic', 'bug', 'fairy'], immune: ['ghost'] },
+            poison:    { strong: ['grass', 'fairy'], weak: ['poison', 'ground', 'rock', 'ghost'], immune: ['steel'] },
+            ground:    { strong: ['fire', 'electric', 'poison', 'rock', 'steel'], weak: ['grass', 'bug'], immune: ['flying'] },
+            flying:    { strong: ['grass', 'fighting', 'bug'], weak: ['electric', 'rock', 'steel'], immune: [] },
+            psychic:   { strong: ['fighting', 'poison'], weak: ['psychic', 'steel'], immune: ['dark'] },
+            bug:       { strong: ['grass', 'psychic', 'dark'], weak: ['fire', 'fighting', 'poison', 'flying', 'ghost', 'steel', 'fairy'], immune: [] },
+            rock:      { strong: ['fire', 'ice', 'flying', 'bug'], weak: ['fighting', 'ground', 'steel'], immune: [] },
+            ghost:     { strong: ['psychic', 'ghost'], weak: ['dark'], immune: ['normal'] },
+            dragon:    { strong: ['dragon'], weak: ['steel'], immune: ['fairy'] },
+            dark:      { strong: ['psychic', 'ghost'], weak: ['fighting', 'dark', 'fairy'], immune: [] },
+            steel:     { strong: ['ice', 'rock', 'fairy'], weak: ['fire', 'water', 'electric', 'steel'], immune: [] },
+            fairy:     { strong: ['fighting', 'dragon', 'dark'], weak: ['fire', 'poison', 'steel'], immune: [] }
+        };
+
+        // Calculate effectiveness for each defending type
+        let effectiveness = {};
+
+        Object.keys(attackChart).forEach(defendingType => {
+            let multiplier = 1;
+            types.forEach(attackingType => {
+                if (attackChart[attackingType]) {
+                    if (attackChart[attackingType].strong.includes(defendingType)) {
+                        multiplier *= 2;
+                    }
+                    if (attackChart[attackingType].weak.includes(defendingType)) {
+                        multiplier *= 0.5;
+                    }
+                    if (attackChart[attackingType].immune.includes(defendingType)) {
+                        multiplier *= 0;
+                    }
+                }
+            });
+            effectiveness[defendingType] = multiplier;
+        });
+
+        strengthsContainer.innerHTML = '';
+
+        const strengths = Object.entries(effectiveness)
+            .filter(([type, multiplier]) => multiplier > 1)
+            .sort((a, b) => b[1] - a[1]);
+
+        if (strengths.length === 0) {
+            strengthsContainer.innerHTML = '<p>No strengths found.</p>';
+            return;
+        }
+
+        const strengthsElement = document.createElement('div');
+        strengthsElement.classList.add('strengths-list');
+        strengthsElement.style.display = 'flex';
+        strengthsElement.style.flexWrap = 'wrap';
+        strengthsElement.style.gap = '8px';
+
+        strengths.forEach(([type, multiplier]) => {
+            const strengthItem = document.createElement('div');
+            strengthItem.classList.add('strength-item');
+            strengthItem.style.display = 'flex';
+            strengthItem.style.alignItems = 'center';
+            strengthItem.style.gap = '4px';
+
+            const typeElement = document.createElement('span');
+            typeElement.classList.add('type', type);
+            typeElement.textContent = type;
+
+            const multiplierElement = document.createElement('span');
+            multiplierElement.classList.add('multiplier');
+            multiplierElement.textContent = `${multiplier}x`;
+
+            strengthItem.appendChild(typeElement);
+            strengthItem.appendChild(multiplierElement);
+            strengthsElement.appendChild(strengthItem);
+        });
+
+        strengthsContainer.appendChild(strengthsElement);
+    }
+});
